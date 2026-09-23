@@ -12,7 +12,10 @@ export const generateToken = (payload, expiresIn = '7d') => {
     throw new Error('JWT_SECRET is not defined in environment variables');
   }
 
-  const tokenPayload = typeof payload === 'object' ? payload : { id: payload };
+  const tokenPayload =
+    typeof payload === 'object' && !(payload instanceof Object && '_bsontype' in payload) && 'id' in payload
+      ? payload
+      : { id: String(payload?._id || payload?.id || payload) };
   return jwt.sign(tokenPayload, secret, { expiresIn });
 };
 

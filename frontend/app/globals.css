@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+@theme {
+  --color-forest-dark: #001E2B;
+  --color-primary: #00ED64;
+  --color-dark-accent: #023430;
+  --color-canvas: #F9FBFA;
+  --color-surface: #FFFFFF;
+  --color-border: #E8EDEB;
+  --color-muted: #5C768D;
+  --color-text-main: #1C2D38;
+  --color-danger: #CF3B3B;
+  --color-warning: #E68B00;
+  --color-deep-interactive: #00684A;
+}
+
+:root {
+  --forest-dark: #001E2B;
+  --primary: #00ED64;
+  --dark-accent: #023430;
+  --canvas: #F9FBFA;
+  --surface: #FFFFFF;
+  --border: #E8EDEB;
+  --muted: #5C768D;
+  --text-main: #1C2D38;
+  --danger: #CF3B3B;
+  --warning: #E68B00;
+  --deep-interactive: #00684A;
+}
+
+body {
+  background-color: var(--canvas);
+  color: var(--text-main);
+  font-family: var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom scrollbars for clean dashboard view */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #E8EDEB;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #5C768D;
+}
