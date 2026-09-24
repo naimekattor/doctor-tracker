@@ -3,14 +3,13 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getDashboardAnalytics } from '@/lib/api/analytics';
-import { Heading, Subheading } from '@/components/ui/Typography';
-import { Button } from '@/components/ui/Button';
+import { DashboardHeader } from '@/features/dashboard/DashboardHeader';
 import { KpiCards } from '@/features/dashboard/KpiCards';
 import { AnalyticsCharts } from '@/features/dashboard/AnalyticsCharts';
+import { TopDoctorCard } from '@/features/dashboard/TopDoctorCard';
 import { RecentPatientsList } from '@/features/dashboard/RecentPatientsList';
 import { CardSkeleton } from '@/components/shared/LoadingState';
 import { ErrorState } from '@/components/shared/ErrorState';
-import { RefreshCw } from 'lucide-react';
 
 export default function DashboardPage() {
   const {
@@ -27,39 +26,32 @@ export default function DashboardPage() {
 
   const stats = data?.data;
 
-  return (
-    <div className="space-y-8">
-      {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-[#E8EDEB]">
-        <div>
-          <Heading>Clinical Operations & Analytics</Heading>
-          <Subheading>
-            Real-time administrative metrics, practitioner capacities, and patient demographics
-          </Subheading>
-        </div>
+  const avgPatientsPerDoctor =
+    stats?.summary && stats.summary.totalDoctors > 0
+      ? (stats.summary.totalPatients / stats.summary.totalDoctors).toFixed(1)
+      : '0';
 
-        <Button
-          variant="secondary"
-          onClick={() => refetch()}
-          disabled={isFetching}
-          className="self-start sm:self-auto h-9 text-xs"
-        >
-          <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${isFetching ? 'animate-spin' : ''}`} />
-          Refresh Metrics
-        </Button>
-      </div>
+  return (
+    <div className="space-y-6">
+      {/* Top Header: Title, Real Team Stack, Info Diagnostics, Bell, Export Button */}
+      <DashboardHeader stats={stats} onRefresh={() => refetch()} />
 
       {/* Loading Skeleton State */}
       {isLoading && (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <CardSkeleton />
             <CardSkeleton />
             <CardSkeleton />
             <CardSkeleton />
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <CardSkeleton />
-            <CardSkeleton />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="lg:col-span-8"><CardSkeleton /></div>
+            <div className="lg:col-span-4"><CardSkeleton /></div>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="lg:col-span-4"><CardSkeleton /></div>
+            <div className="lg:col-span-8"><CardSkeleton /></div>
           </div>
         </div>
       )}
@@ -78,19 +70,35 @@ export default function DashboardPage() {
 
       {/* Analytics Loaded State */}
       {stats && (
-        <div className="space-y-8 animate-in fade-in duration-300">
-          {/* KPI Summary Cards */}
-          <KpiCards summary={stats.summary} />
+        <div className="space-y-6 animate-in fade-in duration-300">
+          {/* Top 4 KPI Summary Cards with 100% Real Dynamic Data */}
+          <KpiCards stats={stats} />
 
-          {/* Visual Analytics Charts */}
+          {/* Middle Section: 2/3 Doctors by Specialization + 1/3 Patient Demographics */}
           <AnalyticsCharts
             specializationBreakdown={stats.specializationBreakdown}
             genderBreakdown={stats.genderBreakdown}
             topDoctors={stats.topDoctorsByPatients}
+            totalPatients={stats.summary.totalPatients}
           />
 
-          {/* Recent Registrations Table */}
-          <RecentPatientsList patients={stats.recentPatients} />
+          {/* Bottom Section: 1/3 Top Practitioner Overview + 2/3 Real Recent Patients Admissions */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="lg:col-span-4 flex flex-col">
+              <TopDoctorCard
+                topDoctor={stats.topDoctorsByPatients?.[0]}
+                avgPatientsPerDoctor={avgPatientsPerDoctor}
+              />
+            </div>
+            <div className="lg:col-span-8 flex flex-col">
+              <RecentPatientsList
+                patients={stats.recentPatients}
+                totalPatientsCount={stats.summary.totalPatients}
+                onRefresh={() => refetch()}
+                isRefreshing={isFetching}
+              />
+            </div>
+          </div>
         </div>
       )}
     </div>
