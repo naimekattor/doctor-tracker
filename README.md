@@ -179,3 +179,29 @@ npm run test:security         # Runs 15-test security suite
 npm run benchmark:pagination  # Runs pagination memory benchmark
 npm run benchmark:load        # Runs concurrent latency profiler
 ```
+
+---
+
+## ⏰ Render Free Tier Sleep Prevention (Keep-Alive Cron)
+
+Render's free tier spins down services after **15 minutes** of inactivity, causing 30–50s cold starts. Three options are provided to keep it warm 24/7:
+
+### Option A: GitHub Actions Cron (Recommended & Automated)
+A pre-configured GitHub Actions workflow runs every 12 minutes (`.github/workflows/keep-alive.yml`).
+1. In your GitHub repository, go to **Settings > Secrets and variables > Actions**.
+2. Add a Repository Variable or Secret:
+   - **Name**: `RENDER_API_URL`
+   - **Value**: `https://<your-render-service>.onrender.com`
+3. GitHub Actions will automatically ping `https://<your-render-service>.onrender.com/api/health` every 12 minutes, keeping the instance active 24/7 at zero cost.
+
+### Option B: Free External HTTP Monitor (Zero Setup)
+Register a free monitor on [cron-job.org](https://cron-job.org) or [UptimeRobot](https://uptimerobot.com):
+- **URL**: `https://<your-render-service>.onrender.com/api/health`
+- **Interval**: Every `10` or `12` minutes.
+
+### Option C: Standalone Node.js Worker Script
+```bash
+cd backend
+PUBLIC_API_URL="https://<your-render-service>.onrender.com" npm run keep-alive
+```
+

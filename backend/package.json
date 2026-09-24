@@ -10,6 +10,7 @@
     "test:security": "node ../security-tests/run-all.js",
     "benchmark:pagination": "node ../load-tests/benchmark-pagination.js",
     "benchmark:load": "node ../load-tests/load-api.js",
+    "keep-alive": "node scripts/keepAlive.js",
     "seed": "node scripts/seed.js"
   },
   "keywords": [],

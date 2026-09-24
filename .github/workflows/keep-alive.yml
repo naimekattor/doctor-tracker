@@ -1,0 +1,37 @@
+name: Render Keep-Alive Cron
+
+on:
+  schedule:
+    # Runs every 12 minutes to prevent Render free instance from entering sleep mode (15 min idle timeout)
+    - cron: '*/12 * * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub Actions dashboard
+
+jobs:
+  keep-alive:
+    name: Keep Render Backend Active
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Health Endpoint
+        run: |
+          TARGET_URL="${{ secrets.RENDER_API_URL || vars.RENDER_API_URL }}"
+          
+          if [ -z "$TARGET_URL" ]; then
+            echo "::notice ::No RENDER_API_URL secret or variable configured yet. Please set RENDER_API_URL in Repository Secrets/Variables."
+            # Fallback placeholder to illustrate URL format
+            TARGET_URL="https://doctor-tracker-api.onrender.com"
+          fi
+
+          ENDPOINT="${TARGET_URL%/}/api/health"
+          echo "Sending keep-alive request to: $ENDPOINT"
+          
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 "$ENDPOINT" || echo "failed")
+          
+          echo "Received HTTP Status: $HTTP_STATUS"
+          
+          if [ "$HTTP_STATUS" = "200" ]; then
+            echo "Success: Render backend is active and healthy."
+          elif [ "$HTTP_STATUS" = "failed" ]; then
+            echo "::warning ::Keep-alive request failed to connect (possible DNS resolution or network issue)."
+          else
+            echo "::warning ::Service returned HTTP $HTTP_STATUS (cold start or maintenance)."
+          fi
