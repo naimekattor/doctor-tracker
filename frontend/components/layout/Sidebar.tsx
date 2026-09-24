@@ -10,7 +10,6 @@ import {
   Stethoscope,
   Users,
   LogOut,
-  Activity,
   Shield,
   X,
 } from 'lucide-react';
@@ -48,16 +47,45 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       >
         {/* Brand Header */}
         <div className="flex h-16 items-center justify-between px-6 border-b border-[#023430]">
-          <Link href="/dashboard" className="flex items-center gap-3 group">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#00ED64] text-[#001E2B] shadow-sm transition-transform group-hover:scale-105">
-              <Activity className="h-5 w-5" />
-            </div>
-            <div>
-              <span className="font-semibold text-base tracking-tight text-white flex items-center gap-1.5">
-                Doctor Tracker
-              </span>
-              <span className="text-[10px] uppercase font-semibold tracking-wider text-[#00ED64]">
-                Enterprise
+          <Link href="/dashboard" className="inline-flex items-center gap-3 group">
+            {/* Icon */}
+            <svg
+              viewBox="0 0 120 120"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-10 h-10 shrink-0 transition-transform group-hover:scale-105"
+            >
+              <path
+                d="M45 10H75V45H110V75H75V110H45V75H10V45H45V10Z"
+                stroke="#001E2B"
+                strokeWidth="10"
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                className="fill-white"
+              />
+              <path
+                d="M12 60H36L44 40L54 80L64 50L72 65L80 60H108"
+                stroke="#00ED64"
+                strokeWidth="6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <rect x="58" y="24" width="6" height="14" rx="2" fill="#00ED64" />
+              <rect x="68" y="16" width="6" height="22" rx="2" fill="#001E2B" />
+            </svg>
+
+            {/* Brand Title + Administrative Subtext */}
+            <div className="flex flex-col justify-center">
+              <div className="flex items-center gap-1.5 leading-none">
+                <span className="text-[19px] font-extrabold tracking-tight text-white">
+                  DOCTOR
+                </span>
+                <span className="text-[19px] font-extrabold tracking-tight text-[#00ED64]">
+                  TRACKER
+                </span>
+              </div>
+              <span className="text-[9px] font-semibold tracking-[0.2em] text-[#5C768D] uppercase mt-1">
+                Administrative Portal
               </span>
             </div>
           </Link>
