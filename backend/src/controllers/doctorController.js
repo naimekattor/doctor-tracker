@@ -1,5 +1,6 @@
 import Doctor from '../models/Doctor.js';
 import Patient from '../models/Patient.js';
+import { escapeRegex } from '../utils/regexUtils.js';
 
 /**
  * Get all doctors with filtering, search, and pagination
@@ -12,20 +13,21 @@ export const getDoctors = async (req, res, next) => {
     const query = {};
 
     if (search) {
+      const safeSearch = escapeRegex(search);
       query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { specialization: { $regex: search, $options: 'i' } },
-        { hospital: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } },
+        { name: { $regex: safeSearch, $options: 'i' } },
+        { specialization: { $regex: safeSearch, $options: 'i' } },
+        { hospital: { $regex: safeSearch, $options: 'i' } },
+        { email: { $regex: safeSearch, $options: 'i' } },
       ];
     }
 
     if (specialization) {
-      query.specialization = { $regex: specialization, $options: 'i' };
+      query.specialization = { $regex: escapeRegex(specialization), $options: 'i' };
     }
 
     if (hospital) {
-      query.hospital = { $regex: hospital, $options: 'i' };
+      query.hospital = { $regex: escapeRegex(hospital), $options: 'i' };
     }
 
     const pageNumber = Math.max(1, parseInt(page, 10) || 1);

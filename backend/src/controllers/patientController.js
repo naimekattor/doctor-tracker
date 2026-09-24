@@ -1,5 +1,6 @@
 import Patient from '../models/Patient.js';
 import Doctor from '../models/Doctor.js';
+import { escapeRegex } from '../utils/regexUtils.js';
 
 /**
  * Get all patients with filtering, search, and pagination
@@ -12,9 +13,10 @@ export const getPatients = async (req, res, next) => {
     const query = {};
 
     if (search) {
+      const safeSearch = escapeRegex(search);
       query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { contactPhone: { $regex: search, $options: 'i' } },
+        { name: { $regex: safeSearch, $options: 'i' } },
+        { contactPhone: { $regex: safeSearch, $options: 'i' } },
       ];
     }
 
@@ -27,7 +29,7 @@ export const getPatients = async (req, res, next) => {
     }
 
     if (condition) {
-      query.condition = { $regex: condition, $options: 'i' };
+      query.condition = { $regex: escapeRegex(condition), $options: 'i' };
     }
 
     const pageNumber = Math.max(1, parseInt(page, 10) || 1);
