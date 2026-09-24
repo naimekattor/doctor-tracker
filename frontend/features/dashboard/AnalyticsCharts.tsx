@@ -1,20 +1,7 @@
 'use client';
 
-import React, { useMemo } from 'react';
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Cell,
-  CartesianGrid,
-} from 'recharts';
-import {
-  Stethoscope,
-  Users,
-} from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { Stethoscope, Users } from 'lucide-react';
 import { SpecializationStat, GenderStat, TopDoctor } from '@/types/analytics';
 
 interface AnalyticsChartsProps {
@@ -32,6 +19,8 @@ export function AnalyticsCharts({
   topDoctors,
   totalPatients = 0,
 }: AnalyticsChartsProps) {
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+
   const totalDoctorsInSpecialties = useMemo(() => {
     return specializationBreakdown.reduce((sum, item) => sum + item.count, 0);
   }, [specializationBreakdown]);
@@ -40,6 +29,20 @@ export function AnalyticsCharts({
     const sum = genderBreakdown.reduce((acc, curr) => acc + curr.count, 0);
     return sum > 0 ? sum : totalPatients || 1;
   }, [genderBreakdown, totalPatients]);
+
+  // Compute scale for Bar Chart
+  const maxCount = useMemo(() => {
+    const rawMax = Math.max(...specializationBreakdown.map((s) => s.count), 0);
+    return Math.max(rawMax <= 4 ? 4 : Math.ceil(rawMax * 1.15), 4);
+  }, [specializationBreakdown]);
+
+  // Y-axis tick intervals (4 steps)
+  const yTicks = useMemo(() => {
+    const step = Math.ceil(maxCount / 4);
+    return [step * 4, step * 3, step * 2, step, 0];
+  }, [maxCount]);
+
+  const effectiveMax = yTicks[0];
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -81,59 +84,89 @@ export function AnalyticsCharts({
           </div>
         </div>
 
-        {/* Dynamic Specialization Bar Chart */}
-        <div className="h-64 sm:h-72 w-full mt-4">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={specializationBreakdown}
-              margin={{ top: 15, right: 10, left: -20, bottom: 25 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F0F3F2" />
-              <XAxis
-                dataKey="specialization"
-                tickLine={false}
-                axisLine={false}
-                tick={{ fill: '#6B7280', fontSize: 11 }}
-                interval={0}
-                angle={-20}
-                textAnchor="end"
-                dy={6}
-              />
-              <YAxis
-                allowDecimals={false}
-                tickLine={false}
-                axisLine={false}
-                tick={{ fill: '#9CA3AF', fontSize: 11 }}
-              />
-              <Tooltip
-                content={({ active, payload }) => {
-                  if (active && payload && payload.length) {
-                    const data = payload[0].payload as SpecializationStat;
-                    return (
-                      <div className="bg-white rounded-[6px] shadow-lg border border-gray-100 p-3 text-xs min-w-[160px]">
-                        <span className="font-semibold text-gray-800 block pb-1 border-b border-gray-100">
-                          {data.specialization}
-                        </span>
-                        <div className="mt-1.5 flex items-center justify-between text-[#00A86B] font-bold">
-                          <span>Doctors:</span>
-                          <span>{data.count}</span>
-                        </div>
-                      </div>
-                    );
-                  }
-                  return null;
-                }}
-              />
-              <Bar dataKey="count" name="Doctors" radius={[6, 6, 0, 0]} maxBarSize={45}>
-                {specializationBreakdown.map((_, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={BAR_COLORS[index % BAR_COLORS.length]}
-                  />
+        {/* High-Performance Native SVG Bar Chart */}
+        <div className="h-64 sm:h-72 w-full mt-4 relative flex flex-col justify-end">
+          {specializationBreakdown.length === 0 ? (
+            <div className="h-full flex items-center justify-center text-xs text-gray-400">
+              No specialization data available
+            </div>
+          ) : (
+            <div className="relative w-full h-full pt-4 pb-8 pl-8 pr-2">
+              {/* Background Grid Lines & Y-Axis Labels */}
+              <div className="absolute inset-0 top-4 bottom-8 left-8 right-2 flex flex-col justify-between pointer-events-none">
+                {yTicks.map((val) => (
+                  <div key={val} className="w-full flex items-center relative">
+                    <span className="absolute -left-7 text-[10px] font-medium text-gray-400 w-5 text-right">
+                      {val}
+                    </span>
+                    <div className="w-full border-b border-gray-100 border-dashed" />
+                  </div>
                 ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+              </div>
+
+              {/* Bars Container */}
+              <div className="relative z-10 w-full h-full flex items-end justify-around gap-2 sm:gap-4">
+                {specializationBreakdown.map((item, index) => {
+                  const heightPercent =
+                    effectiveMax > 0 ? Math.min(100, Math.max(4, (item.count / effectiveMax) * 100)) : 4;
+                  const color = BAR_COLORS[index % BAR_COLORS.length];
+                  const isHovered = hoveredIdx === index;
+
+                  return (
+                    <div
+                      key={item.specialization}
+                      className="relative flex-1 max-w-[52px] h-full flex flex-col justify-end items-center group cursor-pointer"
+                      onMouseEnter={() => setHoveredIdx(index)}
+                      onMouseLeave={() => setHoveredIdx(null)}
+                      onFocus={() => setHoveredIdx(index)}
+                      onBlur={() => setHoveredIdx(null)}
+                      tabIndex={0}
+                      aria-label={`${item.specialization}: ${item.count} doctors`}
+                    >
+                      {/* Floating Tooltip */}
+                      {isHovered && (
+                        <div className="absolute -top-12 z-30 bg-gray-900 text-white rounded-[6px] shadow-lg px-2.5 py-1.5 text-xs whitespace-nowrap pointer-events-none animate-in fade-in zoom-in-95 duration-150">
+                          <span className="font-semibold block text-[11px] text-gray-200">
+                            {item.specialization}
+                          </span>
+                          <span className="text-[#00D084] font-bold text-xs">
+                            {item.count} {item.count === 1 ? 'Doctor' : 'Doctors'}
+                          </span>
+                          <div className="absolute left-1/2 -bottom-1 -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45" />
+                        </div>
+                      )}
+
+                      {/* Bar Rectangle */}
+                      <div
+                        className="w-full rounded-t-[5px] transition-all duration-200"
+                        style={{
+                          height: `${heightPercent}%`,
+                          backgroundColor: color,
+                          opacity: hoveredIdx !== null && !isHovered ? 0.65 : 1,
+                          transform: isHovered ? 'scaleY(1.02)' : 'scaleY(1)',
+                          transformOrigin: 'bottom',
+                        }}
+                      />
+
+                      {/* X-Axis Label */}
+                      <div className="absolute -bottom-7 w-full text-center">
+                        <span
+                          title={item.specialization}
+                          className={`block text-[11px] font-medium truncate transition-colors ${
+                            isHovered ? 'text-gray-900 font-semibold' : 'text-gray-500'
+                          }`}
+                        >
+                          {item.specialization.length > 9
+                            ? `${item.specialization.slice(0, 8)}…`
+                            : item.specialization}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

@@ -5,9 +5,9 @@ import { useQuery } from '@tanstack/react-query';
 import { getDashboardAnalytics } from '@/lib/api/analytics';
 import { DashboardHeader } from '@/features/dashboard/DashboardHeader';
 import { KpiCards } from '@/features/dashboard/KpiCards';
-import { AnalyticsCharts } from '@/features/dashboard/AnalyticsCharts';
 import { TopDoctorCard } from '@/features/dashboard/TopDoctorCard';
 import { RecentPatientsList } from '@/features/dashboard/RecentPatientsList';
+import { AnalyticsCharts } from '@/features/dashboard/AnalyticsCharts';
 import { CardSkeleton } from '@/components/shared/LoadingState';
 import { ErrorState } from '@/components/shared/ErrorState';
 

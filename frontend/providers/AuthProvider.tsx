@@ -16,21 +16,30 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+let pendingUserPromise: Promise<any> | null = null;
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const router = useRouter();
 
   useEffect(() => {
+    let isMounted = true;
+
     async function loadUser() {
       const token = getAuthToken();
       if (!token) {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
         return;
       }
 
       try {
-        const response = await getMeApi(token);
+        if (!pendingUserPromise) {
+          pendingUserPromise = getMeApi(token);
+        }
+        const response = await pendingUserPromise;
+        if (!isMounted) return;
+
         if (response?.user) {
           setUser(response.user);
         } else {
@@ -38,14 +47,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(null);
         }
       } catch {
+        if (!isMounted) return;
         removeAuthToken();
         setUser(null);
       } finally {
-        setIsLoading(false);
+        pendingUserPromise = null;
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
 
     loadUser();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const login = async (credentials: LoginCredentials) => {
