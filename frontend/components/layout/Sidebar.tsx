@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/providers/AuthProvider';
 import { cn } from '@/lib/utils/cn';
@@ -48,31 +49,17 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         {/* Brand Header */}
         <div className="flex h-16 items-center justify-between px-6 border-b border-[#023430]">
           <Link href="/dashboard" className="inline-flex items-center gap-3 group">
-            {/* Icon */}
-            <svg
-              viewBox="0 0 120 120"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-10 h-10 shrink-0 transition-transform group-hover:scale-105"
-            >
-              <path
-                d="M45 10H75V45H110V75H75V110H45V75H10V45H45V10Z"
-                stroke="#001E2B"
-                strokeWidth="10"
-                strokeLinejoin="round"
-                strokeLinecap="round"
-                className="fill-white"
+            {/* Logo */}
+            <div className="relative w-10 h-10 shrink-0 flex items-center justify-center p-1 rounded-xl bg-white/10 border border-white/10 shadow-sm transition-transform duration-200 group-hover:scale-105 overflow-hidden">
+              <Image
+                src="/logo.png"
+                alt="Doctor Tracker Logo"
+                width={36}
+                height={36}
+                className="w-full h-full object-contain"
+                priority
               />
-              <path
-                d="M12 60H36L44 40L54 80L64 50L72 65L80 60H108"
-                stroke="#00ED64"
-                strokeWidth="6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <rect x="58" y="24" width="6" height="14" rx="2" fill="#00ED64" />
-              <rect x="68" y="16" width="6" height="22" rx="2" fill="#001E2B" />
-            </svg>
+            </div>
 
             {/* Brand Title + Administrative Subtext */}
             <div className="flex flex-col justify-center">

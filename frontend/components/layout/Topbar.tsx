@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Menu, Activity } from 'lucide-react';
 
@@ -28,6 +29,16 @@ export function Topbar({ onOpenMobileMenu }: TopbarProps) {
         >
           <Menu className="h-5 w-5" />
         </button>
+
+        <div className="lg:hidden flex items-center">
+          <Image
+            src="/logo.png"
+            alt="Doctor Tracker Logo"
+            width={28}
+            height={28}
+            className="w-7 h-7 object-contain"
+          />
+        </div>
 
         <h1 className="text-lg font-semibold text-[#1C2D38] tracking-tight">
           {getPageTitle()}

@@ -1,6 +1,7 @@
 import React from 'react';
+import Image from 'next/image';
 import { LoginForm } from '@/features/auth/LoginForm';
-import { Activity, ShieldCheck } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -20,8 +21,15 @@ export default function LoginPage() {
       <div className="relative w-full max-w-md space-y-8">
         {/* Brand Header */}
         <div className="text-center space-y-3">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[#00ED64] text-[#001E2B] shadow-lg shadow-[#00ED64]/20 mb-1">
-            <Activity className="h-6 w-6 stroke-[2.2]" />
+          <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 border border-white/15 p-2.5 shadow-xl shadow-black/20 backdrop-blur-sm mb-1">
+            <Image
+              src="/logo.png"
+              alt="Doctor Tracker Logo"
+              width={52}
+              height={52}
+              className="w-full h-full object-contain"
+              priority
+            />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
             Doctor Tracker
