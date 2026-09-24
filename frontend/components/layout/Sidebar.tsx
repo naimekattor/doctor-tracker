@@ -88,12 +88,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               </button>
             ) : null}
 
-            <button
-              className="hidden lg:flex p-1.5 rounded-[6px] text-[#7F9E96] hover:text-white hover:bg-white/10 transition-colors"
-              aria-label="Collapse sidebar"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
+
           </div>
         </div>
 
